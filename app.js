@@ -3,11 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var session = require('express-session')
+
+require('dotenv').config();
+
+var pool = require('./models/bd');
 
 var indexRouter = require('./routes/index');
-const { title } = require('process');
-//var usersRouter = require('./routes/users');
+var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -21,38 +23,43 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(session({
-  secret: 'hsdhuyrbfjkfkkdfsjad',
-  resave:  false,
-  saveUninitialized: true
-}));
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
+/* aca ejemplos de query*/
 
-
-//app.use('/', indexRouter);
-//app.use('/users', usersRouter);
-
-app.get('/', function (req,res){
-  var conocido = Boolean(req.session.nombre)
-
-  res.render('index',{
-     title: 'sesiones en express.js',
-     conocido: conocido,
-     nombre: req.session.nombre
-  });
+// select
+pool.query('select * from empleados').then(function (resultados){
+  console.log(resultados)
 });
 
-app.post('/ingresar', function (req, res) {
-  if (req.body.nombre) { //Tobias
-     req.session.nombre = req.body.nombre
-  }
-  res.redirect('/');
-});
+//insert
+//var obj = {
+  //nombre: 'Juan',
+ //apellido: 'Hagan',
+  //trabajo: 'Programador Senior',
+  //edad: '32',
+ //salario: '120000',
+  //mail: 'Juan@bignet.com',
+//}
 
-app.get('/salir', function (req, res) {
-  req.session.destroy();
-  res.redirect('/');
-});
+//pool.query('insert into empleados set ?' , [obj]).then(function (resultados) { console.log(resultados)
+//});
+
+//update
+//var id = 23;
+//var obj = {
+  //nombre: 'Nicolas',
+  //apellido: 'Gonzales'
+//}
+
+//pool.query('update empleados set ? where id_emp=?' , [obj, id]).then (function (resultados { console.log(resultados);
+//});
+
+//delete
+//var id = 24;
+//pool.query('delete from empleados where id_emp=?' , [id]).then(function (resultados) { console.log(resultados);
+//});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
